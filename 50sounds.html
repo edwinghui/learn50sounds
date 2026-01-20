@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Japanese Script Mega-Trainer (GPL v3.0)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #f0f2f5; padding: 20px; color: #333; }
+        #container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); display: inline-block; min-width: 350px; }
+        
+        /* Display Area */
+        #answer { font-size: 2.5em; color: #007bff; height: 1.2em; margin-bottom: 5px; font-weight: bold; }
+        #letter { font-size: 10em; line-height: 1.1em; margin-bottom: 20px; min-height: 1.2em; }
+        
+        /* Controls */
+        button { padding: 12px 24px; font-size: 1.1em; cursor: pointer; border-radius: 8px; border: 1px solid #ddd; background: #fff; transition: 0.2s; }
+        button:hover { background: #f8f9fa; border-color: #bbb; }
+        #generate { background: #28a745; color: white; border: none; font-weight: bold; width: 100%; margin-bottom: 10px; }
+        #generate:hover { background: #218838; }
+
+        /* Settings Panel */
+        #settings-panel { margin-top: 30px; display: none; text-align: left; background: #fff; padding: 20px; border-radius: 10px; border: 1px solid #ddd; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .section-title { background: #eee; padding: 5px 10px; margin-top: 20px; font-weight: bold; border-radius: 4px; }
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 8px; margin: 10px 0; }
+        .check-item { display: flex; align-items: center; font-size: 0.9em; cursor: pointer; padding: 4px; border: 1px solid #eee; border-radius: 4px; }
+        .check-item:hover { background: #f9f9f9; }
+        .check-item input { margin-right: 6px; }
+
+        footer { margin-top: 40px; font-size: 0.8em; color: #777; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <h1>Japanese Mega-Trainer</h1>
+        <div id="answer"></div>
+        <div id="letter">?</div>
+        
+        <button id="generate">Start / Next</button>
+        <button id="toggle-settings">Settings / Filter</button>
+    </div>
+
+    <div id="settings-panel">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <button onclick="toggleAll(true)">Select All</button>
+            <button onclick="toggleAll(false)">Deselect All</button>
+        </div>
+        
+        <div class="section-title">Hiragana (Basic)</div>
+        <div id="h-basic" class="checkbox-grid"></div>
+        
+        <div class="section-title">Hiragana (Dakuon/Voiced)</div>
+        <div id="h-daku" class="checkbox-grid"></div>
+
+        <div class="section-title">Katakana (Basic)</div>
+        <div id="k-basic" class="checkbox-grid"></div>
+
+        <div class="section-title">Katakana (Dakuon/Voiced)</div>
+        <div id="k-daku" class="checkbox-grid"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026. Licensed under <strong>GNU General Public License v3.0</strong>.</p>
+        <p>This program is free software: you can redistribute it and/or modify it under the terms of the GPL v3.0.</p>
+    </footer>
+
+    <script>
+        // DATA ARRAYS
+        const basicR = ['a','i','u','e','o','ka','ki','ku','ke','ko','sa','shi','su','se','so','ta','chi','tsu','te','to','na','ni','nu','ne','no','ha','hi','fu','he','ho','ma','mi','mu','me','mo','ya','yu','yo','ra','ri','ru','re','ro','wa','wo','n'];
+        const hBasic = ['あ','い','う','え','お','か','き','く','け','こ','さ','し','す','せ','そ','た','ち','つ','て','と','な','に','ぬ','ね','の','は','ひ','ふ','へ','ほ','ま','み','む','め','も','や','ゆ','よ','ら','り','る','れ','ろ','わ','を','ん'];
+        const kBasic = ['ア','イ','ウ','エ','オ','カ','キ','ク','ケ','コ','サ','シ','ス','セ','ソ','タ','チ','ツ','テ','ト','ナ','ニ','ヌ','ネ','ノ','ハ','ヒ','フ','ヘ','ホ','マ','ミ','ム','メ','モ','ヤ','ユ','ヨ','ラ','リ','ル','レ','ロ','ワ','ヲ','ン'];
+        
+        const dakuR = ['ga','gi','gu','ge','go','za','ji','zu','ze','zo','da','ji','zu','de','do','ba','bi','bu','be','bo','pa','pi','pu','pe','po'];
+        const hDaku = ['が','ぎ','ぐ','げ','ご','ざ','じ','ず','ぜ','ぞ','だ','ぢ','づ','で','ど','ば','び','ぶ','べ','ぼ','ぱ','ぴ','ぷ','ぺ','ぽ'];
+        const kDaku = ['ガ','ギ','グ','げ','ゴ','ザ','ジ','ズ','ゼ','ゾ','ダ','ヂ','ヅ','デ','ド','バ','ビ','ブ','ベ','ボ','パ','ピ','プ','ペ','ポ'];
+
+        // MASTER COLLECTION
+        const masterChar = [...hBasic, ...hDaku, ...kBasic, ...kDaku];
+        const masterRoma = [...basicR, ...dakuR, ...basicR, ...dakuR];
+
+        let currentIndex = -1;
+        let showingAnswer = false;
+
+        const letterDiv = document.getElementById('letter');
+        const answerDiv = document.getElementById('answer');
+        const generateBtn = document.getElementById('generate');
+
+        // INITIALIZE SETTINGS
+        function renderSettings() {
+            const saved = JSON.parse(localStorage.getItem('megaTrainerSettings')) || new Array(masterChar.length).fill(true);
+            
+            const fillGrid = (containerId, startIndex, count, list) => {
+                const container = document.getElementById(containerId);
+                for(let i=0; i<count; i++) {
+                    const globalIdx = startIndex + i;
+                    const div = document.createElement('div');
+                    div.className = 'check-item';
+                    const checked = saved[globalIdx] ? 'checked' : '';
+                    div.innerHTML = `<input type="checkbox" id="m-${globalIdx}" ${checked} onchange="saveSettings()"> <label for="m-${globalIdx}">${list[i]}</label>`;
+                    container.appendChild(div);
+                }
+            };
+
+            fillGrid('h-basic', 0, 46, hBasic);
+            fillGrid('h-daku', 46, 25, hDaku);
+            fillGrid('k-basic', 71, 46, kBasic);
+            fillGrid('k-daku', 117, 25, kDaku);
+        }
+
+        function saveSettings() {
+            const checks = document.querySelectorAll('#settings-panel input[type="checkbox"]');
+            const data = Array.from(checks).sort((a,b) => a.id.split('-')[1] - b.id.split('-')[1]).map(c => c.checked);
+            localStorage.setItem('megaTrainerSettings', JSON.stringify(data));
+        }
+
+        function toggleAll(state) {
+            document.querySelectorAll('#settings-panel input').forEach(c => c.checked = state);
+            saveSettings();
+        }
+
+        document.getElementById('toggle-settings').addEventListener('click', () => {
+            const panel = document.getElementById('settings-panel');
+            panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+        });
+
+        // GENERATOR LOGIC
+        generateBtn.addEventListener('click', function() {
+            if (!showingAnswer && currentIndex !== -1) {
+                answerDiv.innerHTML = masterRoma[currentIndex];
+                generateBtn.innerHTML = "Next Character";
+                showingAnswer = true;
+            } else {
+                const activeIndices = [];
+                document.querySelectorAll('#settings-panel input').forEach(c => {
+                    if(c.checked) activeIndices.push(parseInt(c.id.split('-')[1]));
+                });
+
+                if (activeIndices.length === 0) {
+                    alert("Select at least one character in settings!");
+                    return;
+                }
+
+                currentIndex = activeIndices[Math.floor(Math.random() * activeIndices.length)];
+                letterDiv.innerHTML = masterChar[currentIndex];
+                answerDiv.innerHTML = ""; 
+                generateBtn.innerHTML = "Show Answer";
+                showingAnswer = false;
+            }
+        });
+
+        renderSettings();
+    </script>
+</body>
+</html>
