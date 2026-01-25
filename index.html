@@ -2,30 +2,134 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Japanese Script Mega-Trainer (GPL v3.0)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Japanese Script Mega-Trainer (2026 Edition)</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #f0f2f5; padding: 20px; color: #333; }
-        #container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); display: inline-block; min-width: 350px; }
+        /* Modern CSS reset for consistent sizing */
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background: #f0f2f5; 
+            padding: 10px; /* Reduced padding for small screens */
+            margin: 0;
+            color: #333; 
+        }
+
+        #container { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1); 
+            display: block; 
+            width: 100%;
+            max-width: 500px; /* Limits size on desktop but fluid on mobile */
+            margin: 20px auto;
+        }
         
-        /* Display Area */
-        #answer { font-size: 2.5em; color: #007bff; height: 1.2em; margin-bottom: 5px; font-weight: bold; }
-        #letter { font-size: 10em; line-height: 1.1em; margin-bottom: 20px; min-height: 1.2em; }
+        /* Display Area - Responsive Font Sizes */
+        #answer { 
+            font-size: 2em; 
+            color: #007bff; 
+            height: 1.2em; 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+        }
+        #letter { 
+            font-size: 30vw; /* Scales with screen width */
+            max-font-size: 10em;
+            line-height: 1.1em; 
+            margin-bottom: 20px; 
+            min-height: 1.2em; 
+        }
+
+        /* Adjust font size for larger screens to prevent it from getting too big */
+        @media (min-width: 500px) {
+            #letter { font-size: 8em; }
+        }
         
-        /* Controls */
-        button { padding: 12px 24px; font-size: 1.1em; cursor: pointer; border-radius: 8px; border: 1px solid #ddd; background: #fff; transition: 0.2s; }
-        button:hover { background: #f8f9fa; border-color: #bbb; }
-        #generate { background: #28a745; color: white; border: none; font-weight: bold; width: 100%; margin-bottom: 10px; }
-        #generate:hover { background: #218838; }
+        /* Controls - Larger touch targets */
+        button { 
+            padding: 15px 20px; 
+            font-size: 1.1em; 
+            cursor: pointer; 
+            border-radius: 10px; 
+            border: 1px solid #ddd; 
+            background: #fff; 
+            transition: 0.2s;
+            margin: 5px 0;
+            width: 100%; /* Full width for easy tapping */
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        button:active { background: #e9ecef; }
+
+        #generate { 
+            background: #28a745; 
+            color: white; 
+            border: none; 
+            font-weight: bold; 
+        }
+        #generate:active { background: #218838; }
 
         /* Settings Panel */
-        #settings-panel { margin-top: 30px; display: none; text-align: left; background: #fff; padding: 20px; border-radius: 10px; border: 1px solid #ddd; max-width: 800px; margin-left: auto; margin-right: auto; }
-        .section-title { background: #eee; padding: 5px 10px; margin-top: 20px; font-weight: bold; border-radius: 4px; }
-        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 8px; margin: 10px 0; }
-        .check-item { display: flex; align-items: center; font-size: 0.9em; cursor: pointer; padding: 4px; border: 1px solid #eee; border-radius: 4px; }
-        .check-item:hover { background: #f9f9f9; }
-        .check-item input { margin-right: 6px; }
+        #settings-panel { 
+            margin-top: 20px; 
+            display: none; 
+            text-align: left; 
+            background: #fff; 
+            padding: 15px; 
+            border-radius: 15px; 
+            border: 1px solid #ddd; 
+            width: 100%;
+            max-width: 800px; 
+            margin-left: auto; 
+            margin-right: auto; 
+        }
 
-        footer { margin-top: 40px; font-size: 0.8em; color: #777; line-height: 1.4; }
+        .section-title { 
+            background: #eee; 
+            padding: 8px 12px; 
+            margin-top: 15px; 
+            font-weight: bold; 
+            border-radius: 6px; 
+            font-size: 0.9em;
+        }
+
+        /* Improved Grid for Mobile */
+        .checkbox-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); 
+            gap: 10px; 
+            margin: 10px 0; 
+        }
+
+        .check-item { 
+            display: flex; 
+            flex-direction: column; /* Stacked for easier vertical tapping */
+            align-items: center; 
+            justify-content: center;
+            font-size: 1em; 
+            cursor: pointer; 
+            padding: 10px 5px; 
+            border: 1px solid #eee; 
+            border-radius: 8px; 
+            background: #fafafa;
+        }
+
+        .check-item input { 
+            transform: scale(1.4); /* Larger checkboxes */
+            margin-bottom: 8px; 
+        }
+
+        footer { 
+            margin: 40px auto 20px; 
+            font-size: 0.75em; 
+            color: #777; 
+            line-height: 1.4; 
+            max-width: 90%;
+        }
     </style>
 </head>
 <body>
@@ -40,9 +144,9 @@
     </div>
 
     <div id="settings-panel">
-        <div style="text-align: center; margin-bottom: 15px;">
-            <button onclick="toggleAll(true)">Select All</button>
-            <button onclick="toggleAll(false)">Deselect All</button>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="toggleAll(true)" style="font-size: 0.9em;">Select All</button>
+            <button onclick="toggleAll(false)" style="font-size: 0.9em;">Deselect All</button>
         </div>
         
         <div class="section-title">Hiragana (Basic)</div>
@@ -67,11 +171,11 @@
         // DATA ARRAYS
         const basicR = ['a','i','u','e','o','ka','ki','ku','ke','ko','sa','shi','su','se','so','ta','chi','tsu','te','to','na','ni','nu','ne','no','ha','hi','fu','he','ho','ma','mi','mu','me','mo','ya','yu','yo','ra','ri','ru','re','ro','wa','wo','n'];
         const hBasic = ['あ','い','う','え','お','か','き','く','け','こ','さ','し','す','せ','そ','た','ち','つ','て','と','な','に','ぬ','ね','の','は','ひ','ふ','へ','ほ','ま','み','む','め','も','や','ゆ','よ','ら','り','る','れ','ろ','わ','を','ん'];
-        const kBasic = ['ア','イ','ウ','エ','オ','カ','キ','ク','ケ','コ','サ','シ','ス','セ','ソ','タ','チ','ツ','テ','ト','ナ','ニ','ヌ','ネ','ノ','ハ','ヒ','フ','ヘ','ホ','マ','ミ','ム','メ','モ','ヤ','ユ','ヨ','ラ','リ','ル','レ','ロ','ワ','ヲ','ン'];
+        const kBasic = ['ア','イ','ウ','エ','オ','カ','キ','ク','ケ','コ','サ','シ','ス','セ','ソ','タ','ち','ツ','テ','ト','ナ','ニ','ヌ','ネ','ノ','ハ','ヒ','フ','ヘ','ホ','マ','ミ','ム','メ','モ','ヤ','ユ','ヨ','ラ','リ','ル','レ','ロ','わ','を','ン'];
         
         const dakuR = ['ga','gi','gu','ge','go','za','ji','zu','ze','zo','da','ji','zu','de','do','ba','bi','bu','be','bo','pa','pi','pu','pe','po'];
         const hDaku = ['が','ぎ','ぐ','げ','ご','ざ','じ','ず','ぜ','ぞ','だ','ぢ','づ','で','ど','ば','び','ぶ','べ','ぼ','ぱ','ぴ','ぷ','ぺ','ぽ'];
-        const kDaku = ['ガ','ギ','グ','げ','ゴ','ザ','ジ','ズ','ゼ','ゾ','ダ','ヂ','ヅ','デ','ド','バ','ビ','ブ','ベ','ボ','パ','ピ','プ','ペ','ポ'];
+        const kDaku = ['ガ','ギ','グ','ゲ','ゴ','ザ','ジ','ズ','ゼ','ゾ','ダ','ヂ','ヅ','デ','ド','バ','ビ','ブ','ベ','ボ','パ','ピ','プ','ペ','ポ'];
 
         // MASTER COLLECTION
         const masterChar = [...hBasic, ...hDaku, ...kBasic, ...kDaku];
@@ -120,6 +224,9 @@
         document.getElementById('toggle-settings').addEventListener('click', () => {
             const panel = document.getElementById('settings-panel');
             panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+            if (panel.style.display === 'block') {
+                panel.scrollIntoView({ behavior: 'smooth' });
+            }
         });
 
         // GENERATOR LOGIC
